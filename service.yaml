@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metaData:
-  name: web-service
+  name: web-server
 spec:
   selector:
     app: web-server
