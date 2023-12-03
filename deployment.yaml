@@ -5,6 +5,6 @@ metadata:
 spec:
   containers:
     - name: webserver
-      image: webserver:latest
+      image: y16072001001/webserver:latest
       ports:
         - containerPort: 80
