@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+    environment {
+        DOCKERHUB_CREDENTIALS= credentials('dockerhub_cred')
+    }
+    stages {
+        stage('Source checkout') {
+            steps {
+                script {
+                    checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/y16072001-001/web-server']]])
+                }
+            }
+        }
+        stage('Login to Docker Hub') {
+            steps {
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                echo 'Login Completed'
+            }
+        }
+        stage('Build docker image') {
+            steps {
+                script {
+                    sh 'docker build -t $DOCKERHUB_CREDENTIALS_USR/webserver:latest .'
+                }
+            }
+        }
+        stage('Push Image to Docker Hub') {
+            steps {
+                sh 'docker push $DOCKERHUB_CREDENTIALS_USR/webserver:latest'                 
+                echo 'Push Image Completed'
+            }
+        }
+        stage('Deploy to Docker') {
+            steps {
+                script {
+                    sh 'docker run --name webserver -p 80:80 --rm -d $DOCKERHUB_CREDENTIALS_USR/webserver:latest'
+                }
+            }
+        }
+    }
+    post{
+        always {
+            sh 'docker logout'
+        }
+    }
+}
